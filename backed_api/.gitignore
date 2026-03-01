@@ -1,0 +1,4 @@
+# Ignore all related to UV, Application installs everything it needs in docker image
+.python-version
+uv.lock
+pyproject.toml
