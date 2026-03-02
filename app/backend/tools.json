@@ -1,0 +1,40 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "get_model_metrics",
+            "description": "Returns a tuple with metrics for the model: (mean_RSME , mean_R2_score)",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+    
+    {
+        "type": "function",
+        "function": {
+            "name": "get_this_weeks_price",
+            "description": "Returns float with current price of gas this week",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+
+    {
+        "type": "function",
+        "function": {
+            "name": "predict_gas_price_next_week",
+            "description": "Returns a prediction of the gas price next week",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+]

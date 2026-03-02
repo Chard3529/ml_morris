@@ -39,11 +39,18 @@ def train_and_set_model_and_data():
 # After the trained model is ready to be used again. 
 train_and_set_model_and_data()
 
+
 def get_model_metrics():
     """
     Returns the metrics for the current model
     """
     return metrics
+
+def get_this_weeks_price():
+    """
+    Returns price for this week (now 23-02-26)
+    """
+    return cleaned_data.tail(1).iloc[0,0]
 
 def predict_gas_price_next_week():
     """
