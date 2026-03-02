@@ -12,7 +12,7 @@ $ docker build -t gas_prediction_demo .
 
 3. Run the docker application with the command:
 ```Bash
-$ docker run -p 8501:8501 -d --env-file ./put_your_env_file_here/.env  gas_prediction_demo  
+$ docker run --name gas_predictor -p 8501:8501 -d --env-file ./put_your_env_file_here/.env  gas_prediction_demo  
 ```
 4. Open the webpage running on localhost in your browser:
 http://localhost:8501

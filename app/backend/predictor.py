@@ -48,8 +48,8 @@ def get_model_metrics():
 def predict_gas_price_next_week():
     """
     This function predicts the gas price for next week.
-    In this demo the current week is the week that starts monday 11-24-2025
-    The next week is the week that starts monday 01-12-2025
+    In this demo the current week is the week that starts monday 23-02-26
+    The next week is the week that starts monday 02-03-2025
     """
     largest_lag = max(lags)
     largest_window = max(windows)

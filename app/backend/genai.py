@@ -10,8 +10,20 @@ from openai import OpenAI
 import json
 from .predictor import get_model_metrics, predict_gas_price_next_week
 
-# Define tools in json format:
-tools = [
+# The model i am using.
+MODEL = "gpt-5-nano"
+
+# System promt for the lmm agent
+SYSTEM_PROMT = {
+        "role": "system", 
+        "content": """You are a helpful assistant. Your job is to use the provided tools to interact with a Linear regression model. 
+        The model can predict the gas price next week in dollars per gallon, with the tool predict_gas_price_next_week.
+        The get_model_metrics tool returns a tuple of time-series cross-validation metrics for the model. The first tuple value
+        is mean RMSE, the second tuple is R2 score."""
+        }
+
+# The tools the agent has access to 
+TOOLS = [
     {
         "type": "function",
 
@@ -41,25 +53,19 @@ tools = [
     }
 ]
 
-
 def ask_agent(prompt_text):
     client = OpenAI()
 
-    engineered_prompt = {
-        "role": "system", 
-        "content": """You are a helpful assistant. Your job is to use the provided tools to interact with a Linear regression model. 
-        The model can predict the gas price next week in dollars per gallon, with the tool predict_gas_price_next_week.
-        The get_model_metrics tool returns a tuple of time-series cross-validation metrics for the model. The first tuple value
-        is mean RMSE, the second tuple is R2 score."""
-        }
     prompt = {"role": "user", "content": f"{prompt_text}"}
     
+    # Sends system promt, message from user and tools to the gpt-5-nano
     response = client.chat.completions.create(
-        model="gpt-5-nano",
-        messages=[engineered_prompt,prompt],
-        tools=tools
+        model=MODEL,
+        messages=[SYSTEM_PROMT,prompt],
+        tools=TOOLS
     )
 
+    # Get response from llm
     message = response.choices[0].message
 
     # Checks for calls to functions and and handles the response 
@@ -83,7 +89,7 @@ def ask_agent(prompt_text):
             
         final = client.chat.completions.create(
             model="gpt-5-nano",
-            messages=[ engineered_prompt, prompt, message] + tool_messages
+            messages=[SYSTEM_PROMT, prompt, message] + tool_messages
             
         )
         return final.choices[0].message.content
