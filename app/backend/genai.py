@@ -8,7 +8,7 @@ to the frontend
 """
 from openai import OpenAI
 import json
-from .predictor import get_model_metrics, predict_gas_price_next_week
+from .predictor import get_model_metrics, predict_gas_price_next_week, get_this_weeks_price
 
 # The model i am using.
 MODEL = "gpt-5-nano"
@@ -19,41 +19,46 @@ SYSTEM_PROMT = {
         "content": """You are a helpful assistant. Your job is to use the provided tools to interact with a Linear regression model. 
         The model can predict the gas price next week in dollars per gallon, with the tool predict_gas_price_next_week.
         The get_model_metrics tool returns a tuple of time-series cross-validation metrics for the model. The first tuple value
-        is mean RMSE, the second tuple is R2 score."""
+        is mean RMSE, the second tuple is R2 score. """
         }
 
-# The tools the agent has access to 
-TOOLS = [
-    {
-        "type": "function",
+# Reads tools from tools.json:
+with open('./backend/tools.json', "r") as f:
+    TOOLS = json.load(f)
 
-        "function": {
-            "name": "get_model_metrics",
-            "description": "Returns a tuple with metrics for the model: (mean_RSME , mean_R2_score)",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
-    },
+def handle_tool_calls(tool_calls):
+    """
+    Handles the tool calls by calling the appropriate local function
+    takes an array of tool_calls from chatgpt, checks what functions are called
+    stores result and returns an array of tool_messages.
+    """
+    tool_messages = []
+    for tool_call in tool_calls:
+        f_name = tool_call.function.name
 
-    {
-        "type": "function",
+        if (f_name == 'get_model_metrics'):
+            result = get_model_metrics()
 
-        "function": {
-            "name": "predict_gas_price_next_week",
-            "description": "Returns a prediction of the gas price next week",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
-    }
-]
+        elif (f_name == 'predict_gas_price_next_week'):
+            result = predict_gas_price_next_week()
+            
+        elif (f_name == 'get_this_weeks_price'):
+            result = get_this_weeks_price()
+        
+        tool_messages.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "name": f_name,
+            "content": json.dumps(result)
+        })
+    return tool_messages
 
 def ask_agent(prompt_text):
+    """
+    Handles all the main communication with the llm, creates an openai client,
+    sends the user promt, and calls functions as needed. 
+    Returns the message recieved from the llm
+    """
     client = OpenAI()
 
     prompt = {"role": "user", "content": f"{prompt_text}"}
@@ -70,23 +75,8 @@ def ask_agent(prompt_text):
 
     # Checks for calls to functions and and handles the response 
     if message.tool_calls:
-        tool_messages = []
-        for tool_call in message.tool_calls:
-            f_name = tool_call.function.name
-
-            if (f_name == 'get_model_metrics'):
-                result = get_model_metrics()
-
-            elif (f_name == 'predict_gas_price_next_week'):
-                result = predict_gas_price_next_week()
-            
-            tool_messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "name": f_name,
-                "content": json.dumps(result)
-            })
-            
+        tool_messages = handle_tool_calls(message.tool_calls)
+    
         final = client.chat.completions.create(
             model="gpt-5-nano",
             messages=[SYSTEM_PROMT, prompt, message] + tool_messages

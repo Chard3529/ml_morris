@@ -15,8 +15,7 @@ PATH = './backend/raw_data/Weekly_U.S._Regular_All_Formulations_Retail_Gasoline_
 # Pretend to get this csv file from api
 def read_data():
     """
-    Reads data from a csv file at a specific preset path 
-    it reads in a way where we get just the data no headers 
+    Reads data from a csv file at a specific preset path  
     returns a dataframe
     """
     df = pd.read_csv(
@@ -29,7 +28,7 @@ def read_data():
 
 def clean_data_frame(df):
     """
-    Takes a raw df for us-gas prices 
+    Takes a raw df for time series price data 
     returns a correctly formatted dataframe
     """
     
