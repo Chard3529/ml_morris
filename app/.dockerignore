@@ -1,0 +1,5 @@
+# Ignore env path
+put_your_open_ai_env_file_here/
+
+# Ignore readme
+README.md
